@@ -304,11 +304,11 @@ void Search::Worker::iterative_deepening() {
             selDepth = 0;
 
             // Reset aspiration window starting size
-            avgRootMove[us] = rootMoves[pvIdx].averageScore;
+            avgRootMove[us]  = rootMoves[pvIdx].averageScore;
             avgRootMove[~us] = -avgRootMove[us];
-            delta     = 10 + avgRootMove[us] * avgRootMove[us] / 12493;
-            alpha     = std::max(avgRootMove[us] - delta, -VALUE_INFINITE);
-            beta      = std::min(avgRootMove[us] + delta, VALUE_INFINITE);
+            delta            = 10 + avgRootMove[us] * avgRootMove[us] / 12493;
+            alpha            = std::max(avgRootMove[us] - delta, -VALUE_INFINITE);
+            beta             = std::min(avgRootMove[us] + delta, VALUE_INFINITE);
 
             // Start with a small aspiration window and, in the case of a fail
             // high/low, re-search with a bigger window until we don't fail

@@ -186,11 +186,8 @@ bool Network<Arch, Transformer>::save(const std::optional<std::string>& filename
 
 
 template<typename Arch, typename Transformer>
-Value Network<Arch, Transformer>::evaluate(const Position& pos,
-                                           bool            adjusted,
-                                           bool            psqtOnly,
-                                           int             avgRootMove,
-                                           int             simpleEval) const {
+Value Network<Arch, Transformer>::evaluate(
+  const Position& pos, bool adjusted, bool psqtOnly, int avgRootMove, int simpleEval) const {
     // We manually align the arrays on the stack because with gcc < 9.3
     // overaligning stack variables with alignas() doesn't work correctly.
 
@@ -213,10 +210,10 @@ Value Network<Arch, Transformer>::evaluate(const Position& pos,
     const int  bucket = (pos.count<ALL_PIECES>() - 1) / 4;
     const auto psqt   = featureTransformer->transform(pos, transformedFeatures, bucket, psqtOnly);
     const auto positional = !psqtOnly ? (network[bucket]->propagate(transformedFeatures)) : 0;
-    int nnue;
+    int        nnue;
 
     // Adjust optimism based on root move's averageScore (~4 Elo)
-    int optimism  = 132 * avgRootMove / (std::abs(avgRootMove) + 89);
+    int optimism = 132 * avgRootMove / (std::abs(avgRootMove) + 89);
 
     int nnueComplexity = !psqtOnly ? std::abs(psqt - positional) / OutputScale : 0;
 
@@ -229,8 +226,8 @@ Value Network<Arch, Transformer>::evaluate(const Position& pos,
 
         int npm = pos.non_pawn_material() / 64;
         nnue    = (nnue * (npm + pawnCountConstant + pawnCountMul * pos.count<PAWN>())
-             + optimism * (npmConstant + npm))
-          / evalDiv;
+                + optimism * (npmConstant + npm))
+             / evalDiv;
 
         // Damp down the evaluation linearly when shuffling
         int shuffling = pos.rule50_count();
@@ -238,16 +235,16 @@ Value Network<Arch, Transformer>::evaluate(const Position& pos,
     };
 
     // Give more value to positional evaluation when adjusted flag is set
-    if (adjusted){
-        nnue = ((1024 - delta) * psqt + (1024 + delta) * positional)
-                                  / (1024 * OutputScale);
-                                  
+    if (adjusted)
+    {
+        nnue = ((1024 - delta) * psqt + (1024 + delta) * positional) / (1024 * OutputScale);
+
         if (Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsBig)
-        adjustEval(513, 32395, 919, 11, 145, 1036, 178, 204);
+            adjustEval(513, 32395, 919, 11, 145, 1036, 178, 204);
         else if (psqtOnly)
-        adjustEval(517, 32857, 908, 7, 155, 1019, 224, 238);
+            adjustEval(517, 32857, 908, 7, 155, 1019, 224, 238);
         else
-        adjustEval(499, 32793, 903, 9, 147, 1067, 208, 211);
+            adjustEval(499, 32793, 903, 9, 147, 1067, 208, 211);
         return static_cast<Value>(nnue);
     }
     else
