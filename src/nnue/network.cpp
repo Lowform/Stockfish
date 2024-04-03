@@ -211,9 +211,9 @@ Value Network<Arch, Transformer>::evaluate(
     const auto psqt   = featureTransformer->transform(pos, transformedFeatures, bucket, psqtOnly);
     const auto positional = !psqtOnly ? (network[bucket]->propagate(transformedFeatures)) : 0;
 
-    const auto adjustEval = [&](int optDiv, int nnueDiv, int pawnCountConstant, int pawnCountMul,
-                                int npmConstant, int evalDiv, int shufflingConstant,
-                                int shufflingDiv) {
+    const auto Value adjustEval = [&](int optDiv, int nnueDiv, int pawnCountConstant,
+                                      int pawnCountMul, int npmConstant, int evalDiv,
+                                      int shufflingConstant, int shufflingDiv) {
         // Give more value to positional evaluation when adjusted flag is set
         int nnue = ((1024 - delta) * psqt + (1024 + delta) * positional) / (1024 * OutputScale);
 
