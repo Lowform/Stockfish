@@ -210,13 +210,12 @@ Value Network<Arch, Transformer>::evaluate(
     const int  bucket = (pos.count<ALL_PIECES>() - 1) / 4;
     const auto psqt   = featureTransformer->transform(pos, transformedFeatures, bucket, psqtOnly);
     const auto positional = !psqtOnly ? (network[bucket]->propagate(transformedFeatures)) : 0;
-    int        nnue;
 
     const auto adjustEval = [&](int optDiv, int nnueDiv, int pawnCountConstant, int pawnCountMul,
                                 int npmConstant, int evalDiv, int shufflingConstant,
                                 int shufflingDiv) {
         // Give more value to positional evaluation when adjusted flag is set
-        nnue = ((1024 - delta) * psqt + (1024 + delta) * positional) / (1024 * OutputScale);
+        int nnue = ((1024 - delta) * psqt + (1024 + delta) * positional) / (1024 * OutputScale);
 
         // Adjust optimism based on root move's averageScore (~4 Elo)
         int optimism = 132 * avgRootMove / (std::abs(avgRootMove) + 89);
@@ -234,7 +233,7 @@ Value Network<Arch, Transformer>::evaluate(
 
         // Damp down the evaluation linearly when shuffling
         int shuffling = pos.rule50_count();
-        nnue          = nnue * (shufflingConstant - shuffling) / shufflingDiv;
+        return static_cast<Value>(nnue * (shufflingConstant - shuffling) / shufflingDiv);
     };
 
     if (adjusted)
@@ -245,7 +244,6 @@ Value Network<Arch, Transformer>::evaluate(
             adjustEval(517, 32857, 908, 7, 155, 1019, 224, 238);
         else
             adjustEval(499, 32793, 903, 9, 147, 1067, 208, 211);
-        return static_cast<Value>(nnue);
     }
     else
         return static_cast<Value>((psqt + positional) / OutputScale);
