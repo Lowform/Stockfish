@@ -212,14 +212,17 @@ Value Network<Arch, Transformer>::evaluate(
     const auto positional = !psqtOnly ? (network[bucket]->propagate(transformedFeatures)) : 0;
     int        nnue;
 
-    // Adjust optimism based on root move's averageScore (~4 Elo)
-    int optimism = 132 * avgRootMove / (std::abs(avgRootMove) + 89);
-
-    int nnueComplexity = !psqtOnly ? std::abs(psqt - positional) / OutputScale : 0;
-
     const auto adjustEval = [&](int optDiv, int nnueDiv, int pawnCountConstant, int pawnCountMul,
                                 int npmConstant, int evalDiv, int shufflingConstant,
                                 int shufflingDiv) {
+        // Give more value to positional evaluation when adjusted flag is set
+        int nnue = ((1024 - delta) * psqt + (1024 + delta) * positional) / (1024 * OutputScale);
+
+        // Adjust optimism based on root move's averageScore (~4 Elo)
+        int optimism = 132 * avgRootMove / (std::abs(avgRootMove) + 89);
+
+        int nnueComplexity = !psqtOnly ? std::abs(psqt - positional) / OutputScale : 0;
+
         // Blend optimism and eval with nnue complexity and material imbalance
         optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / optDiv;
         nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
@@ -234,11 +237,8 @@ Value Network<Arch, Transformer>::evaluate(
         nnue          = nnue * (shufflingConstant - shuffling) / shufflingDiv;
     };
 
-    // Give more value to positional evaluation when adjusted flag is set
     if (adjusted)
     {
-        nnue = ((1024 - delta) * psqt + (1024 + delta) * positional) / (1024 * OutputScale);
-
         if (Arch::TransformedFeatureDimensions == TransformedFeatureDimensionsBig)
             adjustEval(513, 32395, 919, 11, 145, 1036, 178, 204);
         else if (psqtOnly)
