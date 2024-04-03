@@ -45,7 +45,7 @@ int Eval::simple_eval(const Position& pos, Color c) {
 
 // Evaluate is the evaluator for the outer world. It returns a static evaluation
 // of the position from the point of view of the side to move.
-Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, int optimism) {
+Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, int avgRootMove) {
 
     assert(!pos.checkers());
 
@@ -61,6 +61,9 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
     const auto adjustEval = [&](int optDiv, int nnueDiv, int pawnCountConstant, int pawnCountMul,
                                 int npmConstant, int evalDiv, int shufflingConstant,
                                 int shufflingDiv) {
+        // Adjust optimism based on root move's averageScore (~4 Elo)
+        optimism = 132 * avgRootMove / (std::abs(avgRootMove) + 89);
+
         // Blend optimism and eval with nnue complexity and material imbalance
         optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / optDiv;
         nnue -= nnue * (nnueComplexity * 5 / 3) / nnueDiv;
