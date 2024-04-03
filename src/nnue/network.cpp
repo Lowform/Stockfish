@@ -216,7 +216,7 @@ Value Network<Arch, Transformer>::evaluate(
                                 int npmConstant, int evalDiv, int shufflingConstant,
                                 int shufflingDiv) {
         // Give more value to positional evaluation when adjusted flag is set
-        int nnue = ((1024 - delta) * psqt + (1024 + delta) * positional) / (1024 * OutputScale);
+        nnue = ((1024 - delta) * psqt + (1024 + delta) * positional) / (1024 * OutputScale);
 
         // Adjust optimism based on root move's averageScore (~4 Elo)
         int optimism = 132 * avgRootMove / (std::abs(avgRootMove) + 89);
