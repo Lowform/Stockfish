@@ -53,10 +53,10 @@ class Network {
 
 
     Value evaluate(const Position& pos,
-                   bool            adjusted   = false,
-                   int*            complexity = nullptr,
-                   bool            psqtOnly   = false) const;
-
+                   bool            adjusted    = false,
+                   bool            psqtOnly    = false,
+                   int             avgRootMove = VALUE_ZERO,
+                   int             simpleEval  = VALUE_ZERO) const;
 
     void hint_common_access(const Position& pos, bool psqtOnl) const;
 
