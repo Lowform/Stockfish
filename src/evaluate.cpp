@@ -62,7 +62,7 @@ Value Eval::evaluate(const Eval::NNUE::Networks& networks, const Position& pos, 
                                 int npmConstant, int evalDiv, int shufflingConstant,
                                 int shufflingDiv) {
         // Adjust optimism based on root move's averageScore (~4 Elo)
-        optimism = 132 * avgRootMove / (std::abs(avgRootMove) + 89);
+        int optimism = 132 * avgRootMove / (std::abs(avgRootMove) + 89);
 
         // Blend optimism and eval with nnue complexity and material imbalance
         optimism += optimism * (nnueComplexity + std::abs(simpleEval - nnue)) / optDiv;
